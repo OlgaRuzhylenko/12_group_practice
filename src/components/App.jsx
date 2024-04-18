@@ -9,31 +9,38 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  // useEffect(() => {
-  //   async function getArticles() {
-  //     try {
-  //       setIsLoading(true);
-  //       const data = await fetchArticles("react");
-  //       setArticles(data);
-  //     } catch (error) {
-  //       setError(true);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
-  //   getArticles();
-  // }, []);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
+
   const handleSearch = async (newQuery) => {
-    try {
-      setIsLoading(true);
-      const data = await fetchArticles(newQuery);
-      setArticles(data);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    setQuery(newQuery);
+    setPage(1);
+    setArticles([]);
   };
+
+  const handleLoadMore = () => {
+    setPage(page + 1);
+  };
+
+  useEffect(() => {
+    if (query === "") {
+      return;
+    }
+    async function getArticles() {
+      try {
+        setIsLoading(true);
+        const data = await fetchArticles(query, page);
+        setArticles((prevArticles) => {
+          return [...prevArticles, ...data];
+        });
+      } catch (error) {
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getArticles();
+  }, [query, page]);
 
   return (
     <div className={css.container}>
@@ -42,6 +49,34 @@ export default function App() {
       {error && <b>Oops, error...</b>}
       {isLoading && <b>Please, loading articles...</b>}
       {articles.length > 0 && <ArticleList items={articles} />}
+      {articles.length > 0 && (
+        <button onClick={handleLoadMore}>Load more articles</button>
+      )}
     </div>
   );
 }
+
+// useEffect(() => {
+//   async function getArticles() {
+//     try {
+//       setIsLoading(true);
+//       const data = await fetchArticles("react");
+//       setArticles(data);
+//     } catch (error) {
+//       setError(true);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   }
+//   getArticles();
+// }, []);
+
+//  try {
+//    setIsLoading(true);
+//    const data = await fetchArticles(newQuery);
+//    setArticles(data);
+//  } catch (error) {
+//    setError(true);
+//  } finally {
+//    setIsLoading(false);
+//  }
